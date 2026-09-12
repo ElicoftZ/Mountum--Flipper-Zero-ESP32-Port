@@ -2,37 +2,45 @@
 
 For every feature in this fork: **did it come from the merge, or was it written here?**
 
-Nothing below is a guess. All ~180 directories in the tree were tested against the
-**merge-base commit** shared with [Sor3nt's ESP32 port](https://github.com/Sor3nt/Flipper-Zero-ESP32-Port)
-(`4884e01`) and against [Momentum Firmware](https://github.com/Next-Flip/Momentum-Firmware).
+Nothing below is a guess. All 197 directories in the tree were tested against
+[Sor3nt's ESP32 port](https://github.com/Sor3nt/Flipper-Zero-ESP32-Port) and against
+[Momentum Firmware](https://github.com/Next-Flip/Momentum-Firmware) — by whether each
+directory's actual **source files** appear in those trees, not by matching directory paths.
 
-Membership of the merge-base tree is the test, rather than matching directory paths —
-because code that arrived with the port was sometimes **relocated** afterwards. `mp3_player`
-is exactly that case: its Helix decoder lives at `applications/main/streaming/lib/helix/`
-in the port and at `applications/main/mp3_player/lib/helix/` here. A path comparison calls
-that "new"; it is not.
+Path matching alone is wrong in both directions, so it is not used:
+- Code that came with the port was sometimes **relocated** here — e.g. `mp3_player`, whose
+  Helix decoder lives at `applications/main/streaming/lib/helix/` in the port but at
+  `applications/main/mp3_player/lib/helix/` here. It is the port's, not mine.
+- The port **kept growing** after this fork split off — `streaming`, `components/wifi`,
+  `libsmb2`, `fw_ota`, `ota_updater` and more were added to it later. They are Sor3nt's too.
+
+So every **MINE** entry below was confirmed to have *no* source file present anywhere in the
+port's 5,199 files.
 
 | Verdict | Meaning |
 |---|---|
-| **MERGED** | Present at the merge-base — it came with the port. Not my work. |
+| **MERGED** | Present in Sor3nt's port. Not my work. |
 | **MOMENTUM** | Absent from the port, present in Momentum Firmware. Not the port's, not mine. |
-| **MINE** | Absent from both, and added after the merge-base. Written in this fork. |
+| **MINE** | Present in neither. Written in this fork. |
 
-**Totals: 15 MINE · 3 MOMENTUM · ~162 MERGED.**
+**Totals: 19 MINE · 3 MOMENTUM · 175 MERGED (197 directories).**
 
 ---
 
 # Summary — the short answer
 
-**Written here (15):** Dual Boot · Power Profiler · Wardriving · BLE Detector · Macro Pad ·
+**Written here (19):** Dual Boot · Power Profiler · Wardriving · BLE Detector · Macro Pad ·
 `backup_settings` · `components/multiboot` · `components/nimble_glue` ·
 `components/hotspot_arcade_runtime` · `components/hotspot_arcade_service` ·
-`hotspot_arcade` (integration only) · and 8 mic/audio tools.
+`hotspot_arcade` (integration only) · and 8 mic/audio tools (mic_common, mic_level,
+mic_logger, mic_sonar, mic_waterfall, tone_gen, ultrasonic, voice_notes).
 
 **From Momentum (3):** `momentum_app` · `lib/momentum` · `components/momentum`.
 
-**Everything else — all ~161 remaining directories — is MERGED from the port.**
-That includes every service, every debug app, every example, all libraries,
+**Everything else — all 175 remaining directories — is MERGED from the port.**
+That includes the whole WiFi suite (`wlan_app` — Evil Portal, Deauth, AirSnitch, Android TV,
+Probe Sniffer — and `components/wifi`), plus `streaming`, `libsmb2`, `fw_ota`,
+`ota_updater`, every service, every debug app, every example, all other libraries,
 and 25 of the 34 community apps.
 
 ---
@@ -53,7 +61,7 @@ and 25 of the 34 community apps.
 | ibutton | MERGED | OFW |
 | infrared | MERGED | OFW base; Momentum universal remotes added later |
 | lfrfid | MERGED | OFW |
-| **macro_pad** | **MINE** | USB/BLE HID macro recorder — see note below |
+| **macro_pad** | **MINE** | USB/BLE HID macro recorder |
 | momentum_app | **MOMENTUM** | the Momentum settings application |
 | mp3_player | MERGED | came with the port; Helix decoder is RealNetworks, RPSL/RCSL |
 | nfc | MERGED | OFW; ChameleonUltra support from the port |
@@ -65,7 +73,7 @@ and 25 of the 34 community apps.
 | subghz_remote | MERGED | DarkFlippers — [@gid9798](https://github.com/gid9798), [@xMasterX](https://github.com/xMasterX), MIT |
 | u2f | MERGED | OFW / Momentum CTAP2 |
 | **wardriving** | **MINE** | passive WiFi + BLE + Sub-GHz logger to PSRAM |
-| wlan_app | MERGED | **Sor3nt** — the WiFi application |
+| wlan_app | MERGED | **Sor3nt** — the WiFi suite: Evil Portal, Deauth, AirSnitch, Android TV, Probe Sniffer, SMB browser |
 | wolf3d | MERGED | Wolf4SDL — Moritz Kroll / id Software, GPL |
 
 # 2. applications/settings (14)
@@ -163,9 +171,10 @@ mic_level · mic_logger · mic_sonar · mic_waterfall · tone_gen · ultrasonic 
 
 # Caveats
 
-- **`macro_pad`** is marked MINE because it is absent from the merge-base tree, absent from
-  Momentum, and none of its source files appear anywhere in the port. It carries no author
-  header, so if it came from somewhere else entirely, this is the entry to correct.
+- **`macro_pad`** — written here (confirmed by the author). Absent from the port and from
+  Momentum; none of its source files appear anywhere in the port's tree.
+- **`wardriving`** — written here, on top of Sor3nt's WiFi stack. The WiFi *application*
+  (`wlan_app`) and driver (`components/wifi`) are the port's; this logger app is not.
 - **`hotspot_arcade`** is marked MINE for the *integration only*; the game itself is
   [tarikbc](https://github.com/tarikbc/hotspot-arcade)'s (MIT).
 - Several MERGED community apps ship no `LICENSE`; their terms come from their upstreams.
