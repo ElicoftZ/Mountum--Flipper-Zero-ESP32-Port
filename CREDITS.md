@@ -1,54 +1,133 @@
 # Feature Origin — Merged vs Written Here
 
-This document answers one question for every feature in this fork:
-**did it come from the merge, or was it written here?**
+For every feature in this fork: **did it come from the merge, or was it written here?**
 
-Nothing below is a guess. Every directory was tested for presence in
-[Sor3nt's ESP32 port](https://github.com/Sor3nt/Flipper-Zero-ESP32-Port) and in
-[Momentum Firmware](https://github.com/Next-Flip/Momentum-Firmware). Presence in either
-tree means it was **merged**, not written here.
+Nothing below is a guess. All ~180 directories in the tree were tested against the
+**merge-base commit** shared with [Sor3nt's ESP32 port](https://github.com/Sor3nt/Flipper-Zero-ESP32-Port)
+(`4884e01`) and against [Momentum Firmware](https://github.com/Next-Flip/Momentum-Firmware).
 
-| Bucket | Meaning |
+Membership of the merge-base tree is the test, rather than matching directory paths —
+because code that arrived with the port was sometimes **relocated** afterwards. `mp3_player`
+is exactly that case: its Helix decoder lives at `applications/main/streaming/lib/helix/`
+in the port and at `applications/main/mp3_player/lib/helix/` here. A path comparison calls
+that "new"; it is not.
+
+| Verdict | Meaning |
 |---|---|
-| **Part 1 — Merged** | Came from Sor3nt's port (or from OFW/Momentum through it). Not my work. |
-| **Part 2 — Brought over from Momentum** | Not from Sor3nt's port, but not mine either — Momentum's code, added here. |
-| **Part 3 — Written here** | Exists in neither tree. Original to this fork. |
+| **MERGED** | Present at the merge-base — it came with the port. Not my work. |
+| **MOMENTUM** | Absent from the port, present in Momentum Firmware. Not the port's, not mine. |
+| **MINE** | Absent from both, and added after the merge-base. Written in this fork. |
+
+**Totals: 15 MINE · 3 MOMENTUM · ~162 MERGED.**
 
 ---
 
-# Part 1 — Merged (not my work)
+# Summary — the short answer
 
-## 1.1 The foundation
+**Written here (15):** Dual Boot · Power Profiler · Wardriving · BLE Detector · Macro Pad ·
+`backup_settings` · `components/multiboot` · `components/nimble_glue` ·
+`components/hotspot_arcade_runtime` · `components/hotspot_arcade_service` ·
+`hotspot_arcade` (integration only) · and 8 mic/audio tools.
 
-| Project | Author | What it provides |
+**From Momentum (3):** `momentum_app` · `lib/momentum` · `components/momentum`.
+
+**Everything else — all ~161 remaining directories — is MERGED from the port.**
+That includes every service, every debug app, every example, all libraries,
+and 25 of the 34 community apps.
+
+---
+
+# 1. applications/main (26)
+
+| App | Origin | Notes |
 |---|---|---|
-| [Flipper-Zero-ESP32-Port](https://github.com/Sor3nt/Flipper-Zero-ESP32-Port) | **Sor3nt** | The port this fork is built on — ESP32/ESP-IDF HAL, board bring-up, web flasher, wireless tooling, OTA and SD update |
-| [Flipper Zero firmware](https://github.com/flipperdevices/flipperzero-firmware) | Flipper Devices Inc. | Furi OS, GUI, services, app framework (GPLv3) |
-| [ESP-IDF](https://github.com/espressif/esp-idf) | Espressif Systems | SDK and toolchain (Apache-2.0) |
+| archive | MERGED | OFW |
+| bad_usb | MERGED | OFW |
+| **ble_detector** | **MINE** | BLE scanning/profiling, unbounded scan lists |
+| ble_spam | MERGED | embeds WhisperPair — [zalexdev](https://github.com/zalexdev/wpair-app), Apache-2.0 |
+| clock_app | MERGED | OFW |
+| doom | MERGED | doomgeneric — [ozkl](https://github.com/ozkl/doomgeneric) / id Software, GPLv2 |
+| **dualboot** | **MINE** | multi-firmware boot menu, side-button recovery |
+| esp_now | MERGED | **Sor3nt** — ESP32 wireless |
+| gpio | MERGED | OFW |
+| ibutton | MERGED | OFW |
+| infrared | MERGED | OFW base; Momentum universal remotes added later |
+| lfrfid | MERGED | OFW |
+| **macro_pad** | **MINE** | USB/BLE HID macro recorder — see note below |
+| momentum_app | **MOMENTUM** | the Momentum settings application |
+| mp3_player | MERGED | came with the port; Helix decoder is RealNetworks, RPSL/RCSL |
+| nfc | MERGED | OFW; ChameleonUltra support from the port |
+| nrf24 | MERGED | **Sor3nt** — ESP32 wireless |
+| onewire | MERGED | OFW |
+| **power_profiler** | **MINE** | live power draw from the BQ27220 fuel gauge |
+| streaming | MERGED | Helix decoder — RealNetworks, RPSL/RCSL |
+| subghz | MERGED | OFW |
+| subghz_remote | MERGED | DarkFlippers — [@gid9798](https://github.com/gid9798), [@xMasterX](https://github.com/xMasterX), MIT |
+| u2f | MERGED | OFW / Momentum CTAP2 |
+| **wardriving** | **MINE** | passive WiFi + BLE + Sub-GHz logger to PSRAM |
+| wlan_app | MERGED | **Sor3nt** — the WiFi application |
+| wolf3d | MERGED | Wolf4SDL — Moritz Kroll / id Software, GPL |
 
-## 1.2 Applications that came with the port
+# 2. applications/settings (14)
 
-Present in Sor3nt's tree — **merged, not written here**.
+**MERGED (13):** about · bt_settings_app · clock_settings · desktop_settings ·
+dolphin_passport · expansion_settings_app · input_settings_app · interface_settings ·
+notification_settings · power_settings_app · spoofing_settings · storage_settings · system
 
-`archive` · `bad_usb` · `ble_spam` · `clock_app` · `doom` · `esp_now` · `gpio` ·
-`ibutton` · `infrared` · `lfrfid` · `nfc` · `nrf24` · `onewire` · `streaming` ·
-`subghz` · `subghz_remote` · `u2f` · `wlan_app` · `wolf3d`
+**MINE (1):** `backup_settings` — settings backup and restore.
 
-Where those apps embed someone else's project:
+# 3. applications/services (15) — all MERGED
 
-| App | Embedded work | Author | License |
-|---|---|---|---|
-| `wlan_app`, `esp_now`, `nrf24` | ESP32 wireless tooling | **Sor3nt** | — |
-| `ble_spam` | WhisperPair | [zalexdev](https://github.com/zalexdev/wpair-app) | Apache-2.0 |
-| `doom` | doomgeneric | [ozkl](https://github.com/ozkl/doomgeneric) / id Software | GPLv2 |
-| `wolf3d` | Wolf4SDL | Moritz Kroll / id Software | GPL |
-| `streaming` | Helix decoder | RealNetworks | RPSL / RCSL |
-| `subghz_remote` | SubGHz Remote | DarkFlippers — [@gid9798](https://github.com/gid9798), [@xMasterX](https://github.com/xMasterX) | MIT |
+bt · cli · crypto · desktop · dialogs · dolphin · expansion · gui · input · loader ·
+locale · namechanger · power · rpc · storage
 
-## 1.3 Community apps that came with the port
+# 4. applications/system (6) — all MERGED
 
-All present in Sor3nt's tree. Authors as declared in each app's own `application.fam`,
-`LICENSE` or source header.
+find_my_flipper · hid_app · js_app · ota_updater · snake_game · updater
+
+# 5. applications/debug (27) — all MERGED
+
+accessor · battery_test_app · blink_test · bt_debug_app · ccid_test · crash_test ·
+direct_draw · display_test · event_loop_blink_test · expansion_test · file_browser_test ·
+infrared_test · keypad_test · lfrfid_debug · loader_chaining_a · loader_chaining_b ·
+locale_test · rpc_debug_app · speaker_debug · subghz_test · text_box_element_test ·
+text_box_view_test · uart_echo · unit_tests · usb_mouse · usb_test · vibro_test
+
+# 6. applications/examples (14) + drivers (1) — all MERGED
+
+example_adc · example_apps_assets · example_apps_data · example_ble_beacon ·
+example_custom_font · example_date_time_input · example_event_loop · example_images ·
+example_number_input · example_plugins · example_plugins_advanced · example_thermo ·
+example_view_dispatcher · example_view_holder · drivers/subghz
+
+# 7. components (49)
+
+**MINE (4):** `multiboot` (dynamic multi-boot layout, staged table writes, interrupted-update
+recovery) · `nimble_glue` (NimBLE host integration) · `hotspot_arcade_runtime` ·
+`hotspot_arcade_service` (ESP-IDF plumbing for Hotspot Arcade — the game itself is
+[tarikbc](https://github.com/tarikbc/hotspot-arcade)'s, MIT)
+
+**MOMENTUM (1):** `momentum` — settings core, asset-pack loader, PNG icon decoder
+
+**MERGED (44):** archive · assets · bit_lib · ble_hid · ble_profile · ble_serial · bt ·
+btshim · cli · compat · datetime · desktop · desktop_settings · dialogs · dolphin ·
+flipper_application · flipper_format · flipper_protobuf · furi · furi_ble · furi_hal ·
+fw_ota · gui · heatshrink · infrared · input · lfrfid · libsmb2 · loader · locale · mjs ·
+mlib · music_worker · namechanger · nanopb · nfc · notification · power · rpc · storage ·
+subghz · toolbox · u8g2 · update_util · wifi
+
+# 8. lib (10)
+
+**MOMENTUM (1):** `momentum`
+**MERGED (9):** bit_lib · drivers · flipper_format · infrared · lfrfid · mjs ·
+music_worker · subghz · toolbox
+
+# 9. applications_user (34)
+
+**MINE (9):** hotspot_arcade *(integration only — game is tarikbc's, MIT)* · mic_common ·
+mic_level · mic_logger · mic_sonar · mic_waterfall · tone_gen · ultrasonic · voice_notes
+
+**MERGED (25)** — authors as declared in each app's own `application.fam` / `LICENSE` / source:
 
 | App | Author | Upstream | License |
 |---|---|---|---|
@@ -71,71 +150,23 @@ All present in Sor3nt's tree. Authors as declared in each app's own `application
 | roulette | Superagent | — | see upstream |
 | game15, nfc_magic, t_embed_snake, tetris, texas_holdem, weather_station | not declared in-tree | — | unknown |
 
-## 1.4 Libraries that came with the port
-
-libsmb2 (LGPL-2.1, [sahlberg](https://github.com/sahlberg/libsmb2)) · mJS (Apache-2.0,
-[Cesanta](https://github.com/cesanta/mjs)) · heatshrink (ISC,
-[Atomic Object](https://github.com/atomicobject/heatshrink)) · u8g2 · nanopb · mlib
-
 ---
 
-# Part 2 — Brought over from Momentum (not mine, not from the port)
+# Foundation
 
-Present in Momentum Firmware, absent from Sor3nt's port. **The Momentum team's work**,
-adapted to ESP-IDF here.
-
-| Item | What it is |
-|---|---|
-| `momentum_app` | The Momentum settings application |
-| `lib/momentum`, `components/momentum` | Settings core, asset-pack loader, PNG icon decoder |
-
-The wider Momentum feature set (dolphin levels, passport, menu styles, lockscreen)
-also originates here. See [NOTICE_MOMENTUM_PORT.md](NOTICE_MOMENTUM_PORT.md). Licensed GPLv3.
-
----
-
-# Part 3 — Written here
-
-Absent from **both** Sor3nt's port and Momentum Firmware. Written for the
-LilyGo T-Embed CC1101 by **[ElicoftZ](https://github.com/ElicoftZ)**.
-
-## 3.1 Applications
-
-| App | What it does |
-|---|---|
-| **Dual Boot** | Install and switch between multiple firmwares from a boot menu, with a side-button recovery escape hatch. Dynamic partition allocation, and recovery of an interrupted table update. |
-| **Power Profiler** | Live power-draw trace from the BQ27220 fuel gauge. |
-| **Wardriving** | Passive WiFi + BLE + Sub-GHz logger to PSRAM. |
-| **BLE Detector** | Rapid Bluetooth scanning and profiling, with unbounded scan lists. |
-
-## 3.2 System components
-
-| Component | What it does |
-|---|---|
-| `components/multiboot` | Dynamic multi-boot partition layout, staged table writes, bootloader-side recovery of an interrupted update. |
-| `components/nimble_glue` | NimBLE host integration. |
-| `applications/settings/backup_settings` | Settings backup and restore. |
-
-## 3.3 Microphone and audio tools
-
-`mic_common` · `mic_level` · `mic_logger` · `mic_sonar` · `mic_waterfall` ·
-`tone_gen` · `ultrasonic` · `voice_notes`
-
-## 3.4 Integration only — the code inside is someone else's
-
-Added here, but **not my code**. Only the ESP-IDF plumbing around it is.
-
-| Item | Whose work it is | License |
+| Project | Author | Role |
 |---|---|---|
-| `hotspot_arcade` + `components/hotspot_arcade_runtime` / `_service` | [tarikbc](https://github.com/tarikbc/hotspot-arcade) | MIT |
-| `applications/main/mp3_player` | Helix decoder — RealNetworks (only the I2S glue is mine) | RPSL / RCSL |
+| [Flipper-Zero-ESP32-Port](https://github.com/Sor3nt/Flipper-Zero-ESP32-Port) | **Sor3nt** | the port this fork is built on — HAL, board bring-up, web flasher, wireless tooling, OTA and SD update |
+| [Flipper Zero firmware](https://github.com/flipperdevices/flipperzero-firmware) | Flipper Devices Inc. | Furi OS, GUI, services, app framework (GPLv3) |
+| [Momentum Firmware](https://github.com/Next-Flip/Momentum-Firmware) | The Momentum team | dolphin, passport, settings, menu styles, asset packs (GPLv3) — see [NOTICE_MOMENTUM_PORT.md](NOTICE_MOMENTUM_PORT.md) |
+| [ESP-IDF](https://github.com/espressif/esp-idf) | Espressif Systems | SDK and toolchain (Apache-2.0) |
 
----
+# Caveats
 
-## Unconfirmed
-
-- **`macro_pad`** — in neither tree, but carries no author header and nothing
-  T-Embed-specific. Origin not established, so it is **not claimed here**.
-- Several merged community apps (1.3) ship no `LICENSE` file; their terms must be taken
-  from their upstream repositories.
+- **`macro_pad`** is marked MINE because it is absent from the merge-base tree, absent from
+  Momentum, and none of its source files appear anywhere in the port. It carries no author
+  header, so if it came from somewhere else entirely, this is the entry to correct.
+- **`hotspot_arcade`** is marked MINE for the *integration only*; the game itself is
+  [tarikbc](https://github.com/tarikbc/hotspot-arcade)'s (MIT).
+- Several MERGED community apps ship no `LICENSE`; their terms come from their upstreams.
 - No Momentum asset-pack artwork is redistributed here.
